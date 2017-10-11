@@ -95,6 +95,21 @@ void cpplines (FILE* pipe, const char* filename) {
 }
 
 int main (int argc, char** argv) {
+   
+   // Loop through argv, get opt recognizes options after -str
+   // Loop will continue, grabbing options until end of file
+   // An incompatible option following a '-' will throw an error to sderr
+   for(;;) {
+      int opt = getopt (argc, argv, "@:D:ly");
+      if (opt == EOF) break;
+      switch (opt) {
+         case '@': set_debugflags (optarg);   break;
+         case 'D': (optarg);                  break; // expects a string most useful as __OCLIB_OH__
+         case 'l': yy_flex_debug = 1;         break;  
+         case 'y': yydebug = 1;               break;
+         default:  errprintf ("bad option (%c)\n", optopt); break;
+   } // apply directly to the forhead
+
    const char* execname = basename (argv[0]);
    int exit_status = EXIT_SUCCESS;
    for (int argi = 1; argi < argc; ++argi) {
