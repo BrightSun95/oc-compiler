@@ -111,25 +111,37 @@ int main (int argc, char** argv) {
    // will throw an error to sderr
    // if a single ':' follows option, then an argument is expected 
    // to follow said option
-   string D_opt = new string();
+   string D_opt = "";
    for(;;) {
       int opt = getopt (argc, argv, "@:D:ly");
       if (opt == EOF) break;
       switch (opt) {
          case '@': set_debugflags (optarg);                 break;
          case 'D': D_opt = (optarg);                        break; 
-         case 'l' break;//: yy_flex_debug = 1;         break;  
-         case 'y' break;//: yydebug = 1;               break;
+         case 'l':/*: yy_flex_debug = 1;*/                  break;  
+         case 'y':/*: yydebug = 1;*/                        break;
          default:  errprintf ("bad option (%c)\n", optopt); break;
       }
-   } 
+   }
 
    exec::execname = basename (argv[0]);
    int exit_status = EXIT_SUCCESS;
-   for (int argi = 1; argi < argc; ++argi) {
-      char* filename = argv[argi];
-      string command = CPP + " " + D_opt + " " filename;
-      // printf ("command=\"%s\"\n", command.c_str());
+   //for (int argi = 1; argi < argc; ++argi) {
+      char* filename = argv[optind];
+      string s_filename = filename;
+      // check for .oc suffix
+      if(s_filename.length()<=3){
+         cerr<<"USAGE: filename must end in .oc"<<endl;
+         exit_status = EXIT_FAILURE;
+         return exit_status;
+      }
+      if(s_filename.substr(s_filename.length()-3) != ".oc"){
+         cerr<<"USAGE: filename must end in .oc"<<endl;
+         exit_status = EXIT_FAILURE;
+         return exit_status;
+      }
+      string command = CPP + " " + D_opt + " " + filename;
+      printf ("command=\"%s\"\n", command.c_str());
       FILE* pipe = popen (command.c_str(), "r");
       if (pipe == nullptr) {
          exit_status = EXIT_FAILURE;
@@ -141,7 +153,7 @@ int main (int argc, char** argv) {
          // eprint_status (command.c_str(), pclose_rc);
          if (pclose_rc != 0) exit_status = EXIT_FAILURE;
       }
-   }
+   //}
    FILE* out_file;
    string out_name = basename (argv[1]);
    out_name = out_name.substr(0, out_name.length()-3)+".str";
