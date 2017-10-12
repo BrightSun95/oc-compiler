@@ -111,12 +111,13 @@ int main (int argc, char** argv) {
    // will throw an error to sderr
    // if a single ':' follows option, then an argument is expected 
    // to follow said option
+   string D_opt = new string();
    for(;;) {
       int opt = getopt (argc, argv, "@:D:ly");
       if (opt == EOF) break;
       switch (opt) {
-         case '@': set_debugflags (optarg);   break;
-         case 'D': (optarg);                  break; 
+         case '@': set_debugflags (optarg);                 break;
+         case 'D': D_opt = (optarg);                        break; 
          case 'l' break;//: yy_flex_debug = 1;         break;  
          case 'y' break;//: yydebug = 1;               break;
          default:  errprintf ("bad option (%c)\n", optopt); break;
@@ -127,7 +128,7 @@ int main (int argc, char** argv) {
    int exit_status = EXIT_SUCCESS;
    for (int argi = 1; argi < argc; ++argi) {
       char* filename = argv[argi];
-      string command = CPP + " " + filename;
+      string command = CPP + " " + D_opt + " " filename;
       // printf ("command=\"%s\"\n", command.c_str());
       FILE* pipe = popen (command.c_str(), "r");
       if (pipe == nullptr) {
