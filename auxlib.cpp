@@ -87,7 +87,7 @@ void __stubprintf (const char* file, int line, const char* func,
    fflush (nullptr);
 }     
 
-
+
 void set_debugflags (const char* flags) {
    debugflags = flags;
    assert (debugflags != nullptr);
