@@ -24,6 +24,9 @@ using namespace std;
 
 const string CPP = "/usr/bin/cpp -nostdinc";
 constexpr size_t LINESIZE = 1024;
+int yy_flex_debug = 0; // temporary var until implement yylex()
+int yydebug = 0; // temporary var until implement yyparse()
+
 
 // Chomp the last character from a buffer if it is delim.
 void chomp (char* string, char delim) {
@@ -33,13 +36,16 @@ void chomp (char* string, char delim) {
    if (*nlpos == delim) *nlpos = '\0';
 }
 
+/*
 // Print the meaning of a signal.
 static void eprint_signal (const char* kind, int signal) {
    fprintf (stderr, ", %s %d", kind, signal);
    const char* sigstr = strsignal (signal);
    if (sigstr != nullptr) fprintf (stderr, " %s", sigstr);
 }
+*/
 
+/*
 // Print the status returned from a subprocess.
 void eprint_status (const char* command, int status) {
    if (status == 0) return;
@@ -61,7 +67,7 @@ void eprint_status (const char* command, int status) {
    }
    fprintf (stderr, "\n");
 }
-
+*/
 
 // Run cpp against the lines of the file.
 void cpplines (FILE* pipe, const char* filename) {
@@ -116,21 +122,21 @@ int main (int argc, char** argv) {
       }
    } // apply directly to the forhead
 
-   const char* execname = basename (argv[0]);
+   exec::execname = basename (argv[0]);
    int exit_status = EXIT_SUCCESS;
    for (int argi = 1; argi < argc; ++argi) {
       char* filename = argv[argi];
       string command = CPP + " " + filename;
-      printf ("command=\"%s\"\n", command.c_str());
+      // printf ("command=\"%s\"\n", command.c_str());
       FILE* pipe = popen (command.c_str(), "r");
       if (pipe == nullptr) {
          exit_status = EXIT_FAILURE;
          fprintf (stderr, "%s: %s: %s\n",
-                  execname, command.c_str(), strerror (errno));
+                  exec::execname.c_str(), command.c_str(), strerror (errno));
       }else {
          cpplines (pipe, filename);
          int pclose_rc = pclose (pipe);
-         eprint_status (command.c_str(), pclose_rc);
+         // eprint_status (command.c_str(), pclose_rc);
          if (pclose_rc != 0) exit_status = EXIT_FAILURE;
       }
    }
