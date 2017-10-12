@@ -85,7 +85,7 @@ void cpplines (FILE* pipe, const char* filename) {
       int sscanf_rc = sscanf (buffer, "# %d \"%[^\"]\"",
                               &linenr, inputname);
       if (sscanf_rc == 2) {
-         //printf ("DIRECTIVE: line %d file \"%s\"\n", linenr, inputname);
+         // fprintf line
          continue;
       }
       char* savepos = nullptr;
@@ -107,20 +107,21 @@ int main (int argc, char** argv) {
    
    // Loop through argv, get opt recognizes options after -str
    // Loop will continue, grabbing options until end of file
-   // An incompatible option following a '-' will throw an error to sderr
-   // if a single ':' follows option, then an argument is expected to follow
-   //    said option
+   // An incompatible option following a '-' 
+   // will throw an error to sderr
+   // if a single ':' follows option, then an argument is expected 
+   // to follow said option
    for(;;) {
       int opt = getopt (argc, argv, "@:D:ly");
       if (opt == EOF) break;
       switch (opt) {
          case '@': set_debugflags (optarg);   break;
          case 'D': (optarg);                  break; 
-         case 'l': yy_flex_debug = 1;         break;  
-         case 'y': yydebug = 1;               break;
+         case 'l' break;//: yy_flex_debug = 1;         break;  
+         case 'y' break;//: yydebug = 1;               break;
          default:  errprintf ("bad option (%c)\n", optopt); break;
       }
-   } // apply directly to the forhead
+   } 
 
    exec::execname = basename (argv[0]);
    int exit_status = EXIT_SUCCESS;
@@ -132,7 +133,7 @@ int main (int argc, char** argv) {
       if (pipe == nullptr) {
          exit_status = EXIT_FAILURE;
          fprintf (stderr, "%s: %s: %s\n",
-                  exec::execname.c_str(), command.c_str(), strerror (errno));
+            exec::execname.c_str(), command.c_str(), strerror (errno));
       }else {
          cpplines (pipe, filename);
          int pclose_rc = pclose (pipe);
