@@ -1,3 +1,5 @@
+#//Luke Tanner  latanner
+#//Kevin Crum   kbcrum
 # $Id: Makefile,v 1.14 2017-09-21 15:51:23-07 - - $
 
 GCC        = g++ -g -O0 -Wall -Wextra -std=gnu++14
