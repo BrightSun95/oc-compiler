@@ -16,8 +16,9 @@ using namespace std;
 #include <wait.h>
 #include <assert.h>
 
-#include "auxlib.h"
 #include "string_set.h"
+#include "getopt.h"
+#include "auxlib.h"
 
 const string CPP = "/usr/bin/cpp -nostdinc";
 constexpr size_t LINESIZE = 1024;
@@ -39,7 +40,7 @@ static void eprint_signal (const char* kind, int signal) {
 
 // Print the status returned from a subprocess.
 void eprint_status (const char* command, int status) {
-   if (status == 0) return; 
+   if (status == 0) return;
    fprintf (stderr, "%s: status 0x%04X", command, status);
    if (WIFEXITED (status)) {
       fprintf (stderr, ", exit %d", WEXITSTATUS (status));
@@ -88,7 +89,7 @@ void cpplines (FILE* pipe, const char* filename) {
          if (token == nullptr) break;
          //printf ("token %d.%d: [%s]\n",
          //        linenr, tokenct, token);
-         const string* str = string_set::intern(token);
+         string_set::intern(token);
       }
       ++linenr;
    }
@@ -110,6 +111,7 @@ int main (int argc, char** argv) {
          case 'l': yy_flex_debug = 1;         break;  
          case 'y': yydebug = 1;               break;
          default:  errprintf ("bad option (%c)\n", optopt); break;
+      }
    } // apply directly to the forhead
 
    const char* execname = basename (argv[0]);

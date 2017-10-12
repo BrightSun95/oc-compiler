@@ -22,39 +22,6 @@ struct exec {
    static int exit_status;
 };
 
-void veprintf (const char* format, va_list args);
-// Prints a message to stderr using the vector form of 
-// argument list.
-
-void eprintf (const char* format, ...);
-// Print a message to stderr according to the printf format
-// specified.  Usually called for debug output.
-// Precedes the message by the program name if the format
-// begins with the characters `%:'.
-
-void errprintf (const char* format, ...);
-// Print an error message according to the printf format
-// specified, using eprintf.
-// Sets the exitstatus to EXIT_FAILURE.
-
-void syserrprintf (const char* object);
-// Print a message resulting from a bad system call.  The
-// object is the name of the object causing the problem and
-// the reason is taken from the external variable errno.
-// Sets the exit status to EXIT_FAILURE.
-
-void eprint_status (const char* command, int status);
-// Print the status returned by wait(2) from a subprocess.
-
-
-//
-// Support for stub messages.
-//
-#define STUBPRINTF(...) \
-        __stubprintf (__FILE__, __LINE__, __PRETTY_FUNCTION__, \
-                      __VA_ARGS__)
-void __stubprintf (const char* file, int line, const char* func,
-                   const char* format, ...);
 
 //
 // Debugging utility.
