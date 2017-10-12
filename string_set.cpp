@@ -1,3 +1,5 @@
+//Luke Tanner  latanner
+//Kevin Crum   kbcrum
 // $Id: string_set.cpp,v 1.4 2016-09-21 16:56:20-07 - - $
 
 #include <string>

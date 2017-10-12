@@ -1,3 +1,5 @@
+//Luke Tanner  latanner
+//Kevin Crum   kbcrum
 // $Id: oc.cpp,v 1.8 2017-09-21 15:51:23-07 - - $
 
 // Use cpp to scan a file and print line numbers.
@@ -16,11 +18,15 @@ using namespace std;
 #include <wait.h>
 #include <assert.h>
 
-
 #include "string_set.h"
+#include "getopt.h"
+#include "auxlib.h"
 
 const string CPP = "/usr/bin/cpp -nostdinc";
 constexpr size_t LINESIZE = 1024;
+int yy_flex_debug = 0; // temporary var until implement yylex()
+int yydebug = 0; // temporary var until implement yyparse()
+
 
 // Chomp the last character from a buffer if it is delim.
 void chomp (char* string, char delim) {
@@ -30,16 +36,19 @@ void chomp (char* string, char delim) {
    if (*nlpos == delim) *nlpos = '\0';
 }
 
+/*
 // Print the meaning of a signal.
 static void eprint_signal (const char* kind, int signal) {
    fprintf (stderr, ", %s %d", kind, signal);
    const char* sigstr = strsignal (signal);
    if (sigstr != nullptr) fprintf (stderr, " %s", sigstr);
 }
+*/
 
+/*
 // Print the status returned from a subprocess.
 void eprint_status (const char* command, int status) {
-   if (status == 0) return; 
+   if (status == 0) return;
    fprintf (stderr, "%s: status 0x%04X", command, status);
    if (WIFEXITED (status)) {
       fprintf (stderr, ", exit %d", WEXITSTATUS (status));
@@ -58,7 +67,7 @@ void eprint_status (const char* command, int status) {
    }
    fprintf (stderr, "\n");
 }
-
+*/
 
 // Run cpp against the lines of the file.
 void cpplines (FILE* pipe, const char* filename) {
@@ -76,7 +85,7 @@ void cpplines (FILE* pipe, const char* filename) {
       int sscanf_rc = sscanf (buffer, "# %d \"%[^\"]\"",
                               &linenr, inputname);
       if (sscanf_rc == 2) {
-         //printf ("DIRECTIVE: line %d file \"%s\"\n", linenr, inputname);
+         // fprintf line
          continue;
       }
       char* savepos = nullptr;
@@ -88,7 +97,7 @@ void cpplines (FILE* pipe, const char* filename) {
          if (token == nullptr) break;
          //printf ("token %d.%d: [%s]\n",
          //        linenr, tokenct, token);
-         const string* str = string_set::intern(token);
+         string_set::intern(token);
       }
       ++linenr;
    }
@@ -98,35 +107,38 @@ int main (int argc, char** argv) {
    
    // Loop through argv, get opt recognizes options after -str
    // Loop will continue, grabbing options until end of file
-   // An incompatible option following a '-' will throw an error to sderr
-   // if a single ':' follows option, then an argument is expected to follow
-   //    said option
+   // An incompatible option following a '-' 
+   // will throw an error to sderr
+   // if a single ':' follows option, then an argument is expected 
+   // to follow said option
+   string D_opt = new string();
    for(;;) {
       int opt = getopt (argc, argv, "@:D:ly");
       if (opt == EOF) break;
       switch (opt) {
-         case '@': set_debugflags (optarg);   break;
-         case 'D': (optarg);                  break; 
-         case 'l': yy_flex_debug = 1;         break;  
-         case 'y': yydebug = 1;               break;
+         case '@': set_debugflags (optarg);                 break;
+         case 'D': D_opt = (optarg);                        break; 
+         case 'l' break;//: yy_flex_debug = 1;         break;  
+         case 'y' break;//: yydebug = 1;               break;
          default:  errprintf ("bad option (%c)\n", optopt); break;
-   } // apply directly to the forhead
+      }
+   } 
 
-   const char* execname = basename (argv[0]);
+   exec::execname = basename (argv[0]);
    int exit_status = EXIT_SUCCESS;
    for (int argi = 1; argi < argc; ++argi) {
       char* filename = argv[argi];
-      string command = CPP + " " + filename;
-      printf ("command=\"%s\"\n", command.c_str());
+      string command = CPP + " " + D_opt + " " filename;
+      // printf ("command=\"%s\"\n", command.c_str());
       FILE* pipe = popen (command.c_str(), "r");
       if (pipe == nullptr) {
          exit_status = EXIT_FAILURE;
          fprintf (stderr, "%s: %s: %s\n",
-                  execname, command.c_str(), strerror (errno));
+            exec::execname.c_str(), command.c_str(), strerror (errno));
       }else {
          cpplines (pipe, filename);
          int pclose_rc = pclose (pipe);
-         eprint_status (command.c_str(), pclose_rc);
+         // eprint_status (command.c_str(), pclose_rc);
          if (pclose_rc != 0) exit_status = EXIT_FAILURE;
       }
    }

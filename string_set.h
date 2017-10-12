@@ -1,3 +1,5 @@
+//Luke Tanner  latanner
+//Kevin Crum   kbcrum
 // $Id: string_set.h,v 1.2 2016-08-18 15:13:48-07 - - $
 
 #ifndef __STRING_SET__
