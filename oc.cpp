@@ -15,9 +15,8 @@ using namespace std;
 #include <string.h>
 #include <wait.h>
 #include <assert.h>
-#include <auxlib.h>
 
-
+#include "auxlib.h"
 #include "string_set.h"
 
 const string CPP = "/usr/bin/cpp -nostdinc";
