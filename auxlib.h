@@ -1,3 +1,5 @@
+//Luke Tanner  latanner
+//Kevin Crum   kbcrum
 // $Id: auxlib.h,v 1.5 2017-10-11 14:33:45-07 - - $
 
 #ifndef __AUXLIB_H__
