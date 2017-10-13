@@ -141,7 +141,7 @@ int main (int argc, char** argv) {
          return exit_status;
       }
       string command = CPP + " " + D_opt + " " + filename;
-      printf ("command=\"%s\"\n", command.c_str());
+      // printf ("command=\"%s\"\n", command.c_str());
       FILE* pipe = popen (command.c_str(), "r");
       if (pipe == nullptr) {
          exit_status = EXIT_FAILURE;
