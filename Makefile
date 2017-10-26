@@ -8,7 +8,7 @@ VALGRIND   = valgrind --leak-check=full --show-reachable=yes
 
 MKFILE     = Makefile
 DEPFILE    = Makefile.dep
-SOURCES    = string_set.cpp auxlib.cpp oc.cpp 
+SOURCES    = lyutils.cpp astree.cpp string_set.cpp auxlib.cpp oc.cpp 
 OBJECTS    = ${SOURCES:.cpp=.o}
 EXECBIN    = oc
 SRCFILES   = ${SOURCES} ${MKFILE}
@@ -16,7 +16,21 @@ SMALLFILES = ${DEPFILE} foo.oc foo1.oh foo2.oh
 CHECKINS   = ${SRCFILES} ${SMALLFILES}
 LISTING    = Listing.ps
 
-all : ${EXECBIN}
+LSOURCES   = scanner.l
+YSOURCES   = parser.y
+CLGEN      = yylex.cpp
+HYGEN      = yyparse.h
+CYGEN      = yyparse.cpp
+LREPORT    = yylex.output
+YREPORT    = yyparse.output
+
+all : ${CYGEN} ${CLGEN} ${EXECBIN}
+
+${CLGEN} : ${LSOURCES}
+	flex --outfile=${CLGEN} ${LSOURCES}
+
+${CYGEN} ${HYGEN} : ${YSOURCES}
+	bison --defines=${HYGEN} --output=${CYGEN} ${YSOURCES}
 
 ${EXECBIN} : ${OBJECTS}
 	${GCC} -o${EXECBIN} ${OBJECTS}
@@ -29,10 +43,10 @@ ci :
 	checksource ${CHECKINS}
 
 clean :
-	- rm ${OBJECTS}
+	- rm ${OBJECTS} 
 
 spotless : clean
-	- rm ${EXECBIN} ${LISTING} ${LISTING:.ps=.pdf} ${DEPFILE} \
+	- rm ${EXECBIN} ${LISTING} ${LISTING:.ps=.pdf} ${DEPFILE} ${CLGEN} ${CYGEN} ${HYGEN} ${LREPORT} ${YREPORT}\
 	     test.out misc.lis
 
 ${DEPFILE} :

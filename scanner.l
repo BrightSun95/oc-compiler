@@ -16,11 +16,10 @@ int yylval_token (int symbol) {
 %option 8bit
 %option debug
 %option nodefault
-%option noinput
 %option nounput
 %option noyywrap
+%option verbose
 %option warn
-/*%option verbose*/
 
 LETTER          [A-Za-z_]
 DIGIT           [0-9]

@@ -21,6 +21,7 @@ using namespace std;
 #include "string_set.h"
 #include "getopt.h"
 #include "auxlib.h"
+#include "lyutils.h"
 
 const string CPP = "/usr/bin/cpp -nostdinc";
 constexpr size_t LINESIZE = 1024;
@@ -142,14 +143,14 @@ int main (int argc, char** argv) {
       }
       string command = CPP + " " + D_opt + " " + filename;
       // printf ("command=\"%s\"\n", command.c_str());
-      FILE* pipe = popen (command.c_str(), "r");
-      if (pipe == nullptr) {
+      FILE* yyin = popen (command.c_str(), "r");
+      if (yyin == nullptr) {
          exit_status = EXIT_FAILURE;
          fprintf (stderr, "%s: %s: %s\n",
             exec::execname.c_str(), command.c_str(), strerror (errno));
       }else {
-         cpplines (pipe, filename);
-         int pclose_rc = pclose (pipe);
+         cpplines (yyin, filename);
+         int pclose_rc = pclose (yyin);
          // eprint_status (command.c_str(), pclose_rc);
          if (pclose_rc != 0) exit_status = EXIT_FAILURE;
       }
