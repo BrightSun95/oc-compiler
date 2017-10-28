@@ -36,7 +36,10 @@ TOK_IDENT           ({TOK_LETTER}({TOK_LETTER}|{TOK_DIGIT})*)
 
 {TOK_NUMBER}    { return yylval_token (TOK_INTCON); }
 {TOK_IDENT}     { return yylval_token (TOK_IDENT);  }
+"=="			{ return yylval_token (TOK_EQ); }
 "="             { return yylval_token ('='); }
+{TOK_IF}		{ return yylval_token (TOK_IF);}
+{TOK_ELSE} 		{ return yylval_token (TOK_ELSE);}
 "+"             { return yylval_token ('+'); }
 "-"             { return yylval_token ('-'); }
 "*"             { return yylval_token ('*'); }
