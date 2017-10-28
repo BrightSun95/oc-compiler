@@ -42,7 +42,6 @@ astree* astree::adopt_sym (astree* child, int symbol_) {
    return adopt (child);
 }
 
-
 void astree::dump_node (FILE* outfile) {
    fprintf (outfile, "%p->{%s %zd.%zd.%zd \"%s\":",
             this, parser::get_tname (symbol),

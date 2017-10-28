@@ -21,13 +21,12 @@ int yylval_token (int symbol) {
 %option verbose
 %option warn
 
-LETTER          [A-Za-z_]
-DIGIT           [0-9]
-MANTISSA        ({DIGIT}+\.?{DIGIT}*|\.{DIGIT}+)
-EXPONENT        ([Ee][+-]?{DIGIT}+)
-NUMBER          ({MANTISSA}{EXPONENT}?)
-NOTNUMBER       ({MANTISSA}[Ee][+-]?)
-IDENT           ({LETTER}({LETTER}|{DIGIT})*)
+TOK_LETTER          [A-Za-z_]
+TOK_DIGIT           [0-9]
+TOK_MANTISSA        ({TOK_DIGIT}+\.?{TOK_DIGIT}*|\.{TOK_DIGIT}+)
+TOK_NUMBER          ([1-9]+[^.]{TOK_DIGIT}*)
+TOK_NOTNUMBER       ({TOK_MANTISSA}[Ee][+-]?)
+TOK_IDENT           ({TOK_LETTER}({TOK_LETTER}|{TOK_DIGIT})*)
 
 %%
 
@@ -35,8 +34,8 @@ IDENT           ({LETTER}({LETTER}|{DIGIT})*)
 [ \t]+          { }
 \n              { lexer::newline(); }
 
-{NUMBER}        { return yylval_token (NUMBER); }
-{IDENT}         { return yylval_token (IDENT); }
+{TOK_NUMBER}    { return yylval_token (TOK_NUMBER); }
+{TOK_IDENT}     { return yylval_token (TOK_IDENT); }
 "="             { return yylval_token ('='); }
 "+"             { return yylval_token ('+'); }
 "-"             { return yylval_token ('-'); }
@@ -47,9 +46,9 @@ IDENT           ({LETTER}({LETTER}|{DIGIT})*)
 ")"             { return yylval_token (')'); }
 ";"             { return yylval_token (';'); }
 
-{NOTNUMBER}     { lexer::badtoken (yytext);
-                  return yylval_token (NUMBER); }
-.               { lexer::badchar (*yytext); }
+{TOK_NOTNUMBER}     { lexer::badtoken (yytext);
+                  		return yylval_token (TOK_NUMBER); }
+.               	{ lexer::badchar (*yytext); }
 
 %%
 

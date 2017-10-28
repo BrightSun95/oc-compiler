@@ -25,8 +25,8 @@ using namespace std;
 
 const string CPP = "/usr/bin/cpp -nostdinc";
 constexpr size_t LINESIZE = 1024;
-int yy_flex_debug = 0; // temporary var until implement yylex()
-int yydebug = 0; // temporary var until implement yyparse()
+// int yy_flex_debug = 0; // temporary var until implement yylex()
+//int yydebug = 0; // temporary var until implement yyparse()
 
 
 // Chomp the last character from a buffer if it is delim.

@@ -25,7 +25,7 @@ void lexer::newfilename (const string& filename) {
    lexer::filenames.push_back (filename);
 }
 
-void lexer::advance() {
+void lexer::advance()  {
    if (not interactive) {
       if (lexer::lloc.offset == 0) {
          printf (";%2zd.%3zd: ",
@@ -50,7 +50,6 @@ void lexer::badchar (unsigned char bad) {
                   buffer);
 }
 
-
 void lexer::badtoken (char* lexeme) {
    errllocprintf (lexer::lloc, "invalid token (%s)\n", lexeme);
 }
@@ -76,4 +75,3 @@ void yyerror (const char* message) {
    assert (not lexer::filenames.empty());
    errllocprintf (lexer::lloc, "%s\n", message);
 }
-

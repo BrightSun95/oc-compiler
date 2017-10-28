@@ -25,7 +25,7 @@ struct astree {
 
    // Functions.
    astree (int symbol, const location&, const char* lexinfo);
-   ~astree();
+   ~astree();     // default ctor
    astree* adopt (astree* child1, astree* child2 = nullptr);
    astree* adopt_sym (astree* child, int symbol);
    void dump_node (FILE*);

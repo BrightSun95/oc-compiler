@@ -15,7 +15,7 @@
 %token-table
 %verbose
 
-%token TOK_VOID TOK_CHAR TOK_INT TOK_STRING
+%token TOK_VOID TOK_CHAR TOK_INT TOK_STRING TOK_NUMBER
 %token TOK_IF TOK_ELSE TOK_WHILE TOK_RETURN TOK_STRUCT
 %token TOK_NULL TOK_NEW TOK_ARRAY
 %token TOK_EQ TOK_NE TOK_LT TOK_LE TOK_GT TOK_GE
@@ -32,7 +32,7 @@
 program : program token | ;
 token   : '(' | ')' | '[' | ']' | '{' | '}' | ';' | ',' | '.'
         | '=' | '+' | '-' | '*' | '/' | '%' | '!'
-        | TOK_VOID | TOK_CHAR | TOK_INT | TOK_STRING
+        | TOK_VOID | TOK_CHAR | TOK_INT | TOK_STRING | TOK_NUMBER
         | TOK_IF | TOK_ELSE | TOK_WHILE | TOK_RETURN | TOK_STRUCT
         | TOK_NULL | TOK_NEW | TOK_ARRAY
         | TOK_EQ | TOK_NE | TOK_LT | TOK_LE | TOK_GT | TOK_GE
@@ -41,7 +41,7 @@ token   : '(' | ')' | '[' | ']' | '{' | '}' | ';' | ',' | '.'
         ;
 
 %%
-
+
 
 const char *parser::get_tname (int symbol) {
    return yytname [YYTRANSLATE (symbol)];
