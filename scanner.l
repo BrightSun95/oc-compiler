@@ -24,7 +24,7 @@ int yylval_token (int symbol) {
 TOK_LETTER          [A-Za-z_]
 TOK_DIGIT           [0-9]
 TOK_MANTISSA        ({TOK_DIGIT}+\.?{TOK_DIGIT}*|\.{TOK_DIGIT}+)
-TOK_NUMBER          ([1-9]+[^.]{TOK_DIGIT}*)
+TOK_NUMBER          ({TOK_DIGIT}+)
 TOK_NOTNUMBER       ({TOK_MANTISSA}[Ee][+-]?)
 TOK_IDENT           ({TOK_LETTER}({TOK_LETTER}|{TOK_DIGIT})*)
 
@@ -34,8 +34,8 @@ TOK_IDENT           ({TOK_LETTER}({TOK_LETTER}|{TOK_DIGIT})*)
 [ \t]+          { }
 \n              { lexer::newline(); }
 
-{TOK_NUMBER}    { return yylval_token (TOK_NUMBER); }
-{TOK_IDENT}     { return yylval_token (TOK_IDENT); }
+{TOK_NUMBER}    { return yylval_token (TOK_INTCON); }
+{TOK_IDENT}     { return yylval_token (TOK_IDENT);  }
 "="             { return yylval_token ('='); }
 "+"             { return yylval_token ('+'); }
 "-"             { return yylval_token ('-'); }
@@ -47,7 +47,7 @@ TOK_IDENT           ({TOK_LETTER}({TOK_LETTER}|{TOK_DIGIT})*)
 ";"             { return yylval_token (';'); }
 
 {TOK_NOTNUMBER}     { lexer::badtoken (yytext);
-                  		return yylval_token (TOK_NUMBER); }
+                  		return yylval_token (TOK_INTCON); }
 .               	{ lexer::badchar (*yytext); }
 
 %%

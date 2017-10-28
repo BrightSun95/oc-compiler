@@ -112,7 +112,10 @@ int main (int argc, char** argv) {
    // will throw an error to sderr
    // if a single ':' follows option, then an argument is expected 
    // to follow said option
+   // initialize non-debug states
    string D_opt = "";
+   yy_flex_debug =0;    
+   yydebug =0;
    for(;;) {
       int opt = getopt (argc, argv, "@:D:ly");
       if (opt == EOF) break;
