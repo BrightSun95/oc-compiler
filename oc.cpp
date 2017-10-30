@@ -37,45 +37,45 @@ void chomp (char* string, char delim) {
    if (*nlpos == delim) *nlpos = '\0';
 }
 
-/*
+
 // Print the meaning of a signal.
-static void eprint_signal (const char* kind, int signal) {
+static void print_signal (const char* kind, int signal) {
    fprintf (stderr, ", %s %d", kind, signal);
    const char* sigstr = strsignal (signal);
    if (sigstr != nullptr) fprintf (stderr, " %s", sigstr);
 }
-*/
 
-/*
+
+
 // Print the status returned from a subprocess.
-void eprint_status (const char* command, int status) {
+void print_status (const char* command, int status) {
    if (status == 0) return;
    fprintf (stderr, "%s: status 0x%04X", command, status);
    if (WIFEXITED (status)) {
       fprintf (stderr, ", exit %d", WEXITSTATUS (status));
    }
    if (WIFSIGNALED (status)) {
-      eprint_signal ("Terminated", WTERMSIG (status));
+      print_signal ("Terminated", WTERMSIG (status));
       #ifdef WCOREDUMP
       if (WCOREDUMP (status)) fprintf (stderr, ", core dumped");
       #endif
    }
    if (WIFSTOPPED (status)) {
-      eprint_signal ("Stopped", WSTOPSIG (status));
+      print_signal ("Stopped", WSTOPSIG (status));
    }
    if (WIFCONTINUED (status)) {
       fprintf (stderr, ", Continued");
    }
    fprintf (stderr, "\n");
 }
-*/
+
 
 // Run cpp against the lines of the file.
 void cpplines (FILE* pipe, const char* filename) {
    int linenr = 1;
    char inputname[LINESIZE];
    strcpy (inputname, filename);
-
+   cout<<"in cpplines"<<endl;
    for (;;) {
       char buffer[LINESIZE];
       char* fgets_rc = fgets (buffer, LINESIZE, pipe);
@@ -98,11 +98,13 @@ void cpplines (FILE* pipe, const char* filename) {
          if (token == nullptr) break;
          //printf ("token %d.%d: [%s]\n",
          //        linenr, tokenct, token);
+         
          string_set::intern(token);
       }
       ++linenr;
    }
 }
+
 
 int main (int argc, char** argv) {
    
@@ -116,6 +118,7 @@ int main (int argc, char** argv) {
    string D_opt = "";
    yy_flex_debug =0;    
    yydebug =0;
+   
    for(;;) {
       int opt = getopt (argc, argv, "@:D:ly");
       if (opt == EOF) break;
@@ -146,15 +149,25 @@ int main (int argc, char** argv) {
       }
       string command = CPP + " " + D_opt + " " + filename;
       // printf ("command=\"%s\"\n", command.c_str());
+      cout<<"before yyin"<<endl;
       FILE* yyin = popen (command.c_str(), "r");
+      cout<<"Preprocessor-shit"<<endl;
+      cpplines (yyin, filename);
+      cout<<"after yyin"<<endl;
       if (yyin == nullptr) {
+         cout<<"nullptr"<<endl;
          exit_status = EXIT_FAILURE;
          fprintf (stderr, "%s: %s: %s\n",
             exec::execname.c_str(), command.c_str(), strerror (errno));
       }else {
-         cpplines (yyin, filename);
+         while(yyin!= nullptr){
+            if(yy_flex_debug == 1){
+               yylex();             
+            }   
+         }
+         
          int pclose_rc = pclose (yyin);
-         // eprint_status (command.c_str(), pclose_rc);
+         // print_status (command.c_str(), pclose_rc);
          if (pclose_rc != 0) exit_status = EXIT_FAILURE;
       }
    //}
