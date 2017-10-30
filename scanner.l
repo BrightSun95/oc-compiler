@@ -22,6 +22,8 @@ int yylval_token (int symbol) {
 TOK_LETTER          [A-Za-z_]
 TOK_DIGIT           [0-9]
 TOK_MANTISSA        ({TOK_DIGIT}+\.?{TOK_DIGIT}*|\.{TOK_DIGIT}+)
+TOK_CHAR_CON		('([^\\'\n]|\\[\\'"0nt])') 
+TOK_STRCON			(\"([^\\"\n]|\\[\\'"0nt])*\")
 TOK_NUMBER          ({TOK_DIGIT}+)
 TOK_NOTNUMBER       ({TOK_MANTISSA}[Ee][+-]?)
 TOK_INT 			({TOK_DIGIT}+)
