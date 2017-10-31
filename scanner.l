@@ -1,11 +1,13 @@
 %{
 
 #include "lyutils.h"
+#include "string_set.h"
 
 #define YY_USER_ACTION  { lexer::advance(); }
 
 int yylval_token (int symbol) {
    yylval = new astree (symbol, lexer::lloc, yytext);
+   string_set::intern(yytext);
    return symbol;
 }
 

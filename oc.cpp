@@ -7,6 +7,7 @@
 // tokens.
 
 #include <string>
+#include <typeinfo>
 using namespace std;
 
 #include <errno.h>
@@ -69,43 +70,6 @@ void print_status (const char* command, int status) {
    fprintf (stderr, "\n");
 }
 
-
-// Run cpp against the lines of the file.
-void cpplines (FILE* pipe, const char* filename) {
-   int linenr = 1;
-   char inputname[LINESIZE];
-   strcpy (inputname, filename);
-   cout<<"in cpplines"<<endl;
-   for (;;) {
-      char buffer[LINESIZE];
-      char* fgets_rc = fgets (buffer, LINESIZE, pipe);
-      if (fgets_rc == nullptr) break;
-      chomp (buffer, '\n');
-      //printf ("%s:line %d: [%s]\n", filename, linenr, buffer);
-      // http://gcc.gnu.org/onlinedocs/cpp/Preprocessor-Output.html
-      int sscanf_rc = sscanf (buffer, "# %d \"%[^\"]\"",
-                              &linenr, inputname);
-      if (sscanf_rc == 2) {
-         // fprintf line
-         continue;
-      }
-      char* savepos = nullptr;
-      char* bufptr = buffer;
-      
-      for (int tokenct = 1;; ++tokenct) {
-         char* token = strtok_r (bufptr, " \t\n", &savepos);
-         bufptr = nullptr;
-         if (token == nullptr) break;
-         //printf ("token %d.%d: [%s]\n",
-         //        linenr, tokenct, token);
-         
-         string_set::intern(token);
-      }
-      ++linenr;
-   }
-}
-
-
 int main (int argc, char** argv) {
    
    // Loop through argv, get opt recognizes options after -str
@@ -148,13 +112,8 @@ int main (int argc, char** argv) {
    }
    string command = CPP + " " + D_opt + " " + filename;
    // printf ("command=\"%s\"\n", command.c_str());
-   cout<<"before yyin"<<endl;
-   FILE* yyin = popen (command.c_str(), "r");
-   cout<<"Preprocessor-shit"<<endl;
-   cpplines (yyin, filename);
-   cout<<"after yyin"<<endl;
+   yyin = popen (command.c_str(), "r");
    if (yyin == nullptr) {
-      cout<<"nullptr"<<endl;  // delete before submission
       exit_status = EXIT_FAILURE;
       fprintf (stderr, "%s: %s: %s\n",
          exec::execname.c_str(), command.c_str(), strerror (errno));
@@ -165,7 +124,6 @@ int main (int argc, char** argv) {
          astree::dump(stdout, yylval);
       }
       destroy(yylval);
-      // cpplines(yyin,filename);
    }
    int pclose_rc = pclose (yyin);
    // print_status (command.c_str(), pclose_rc);
