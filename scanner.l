@@ -82,8 +82,8 @@ TOK_IDENT           ({TOK_LETTER}({TOK_LETTER}|{TOK_DIGIT})*)
 
 {TOK_NOTNUMBER}     { lexer::badtoken (yytext);
                         return yylval_token (TOK_INTCON); }
-{TOK_CHAR_CON}		{ return yylval_token (TOK_CHARCON); }
-{TOK_STRCON}		{ return yylval_token (TOK_STRINGCON);}
+{TOK_CHAR_CON}      { return yylval_token (TOK_CHARCON); }
+{TOK_STRCON}        { return yylval_token (TOK_STRINGCON);}
 
 .                   { lexer::badchar (*yytext); }
 

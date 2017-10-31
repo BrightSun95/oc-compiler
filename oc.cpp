@@ -106,12 +106,10 @@ void scan_opts (int argc, char** argv) {
    }
    exit_status = EXIT_SUCCESS;
    char* filename = argv[optind];
-   cout<<"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"<<endl;
-   cout<<filename<<endl;
-   cout<<"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"<<endl;
    string s_filename = filename;
    // check for .oc suffix
-   if(s_filename.length()<=3 || s_filename.substr(s_filename.length()-3) != ".oc"){
+   if(s_filename.length()<=3 || 
+      s_filename.substr(s_filename.length()-3) != ".oc"){
       cerr<<"USAGE: filename must end in .oc"<<endl;
       exit_status = EXIT_FAILURE;
       exit (exec::exit_status);
@@ -122,33 +120,13 @@ void scan_opts (int argc, char** argv) {
                  exec::execname.c_str());
       exit (exec::exit_status);
    }
-   //const char* filename = optind == argc ? "-" : argv[optind];
    cpp_popen (filename);
 }
 
 
 int main (int argc, char** argv) {
-
    exec::execname = basename (argv[0]);
-
    scan_opts(argc, argv);
-   //int parse_rc = yyparse();
-   cpp_pclose();
-   yylex_destroy();
-   /*
-   if (yyin == nullptr) {
-      exit_status = EXIT_FAILURE;
-      fprintf (stderr, "%s: %s: %s\n",
-         exec::execname.c_str(), cpp_command.c_str(), strerror (errno));
-   }else {
-      while(true){
-         int this_tok = yylex();
-         if(this_tok == YYEOF) break;
-         astree::dump(stdout, yylval);
-      }
-      destroy(yylval);
-   }
-   */
    return exit_status;
 }
 
