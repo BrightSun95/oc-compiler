@@ -133,47 +133,47 @@ int main (int argc, char** argv) {
 
    exec::execname = basename (argv[0]);
    int exit_status = EXIT_SUCCESS;
-   //for (int argi = 1; argi < argc; ++argi) {
-      char* filename = argv[optind];
-      string s_filename = filename;
-      // check for .oc suffix
-      if(s_filename.length()<=3){
-         cerr<<"USAGE: filename must end in .oc"<<endl;
-         exit_status = EXIT_FAILURE;
-         return exit_status;
+   char* filename = argv[optind];
+   string s_filename = filename;
+   // check for .oc suffix
+   if(s_filename.length()<=3){
+      cerr<<"USAGE: filename must end in .oc"<<endl;
+      exit_status = EXIT_FAILURE;
+      return exit_status;
+   }
+   if(s_filename.substr(s_filename.length()-3) != ".oc"){
+      cerr<<"USAGE: filename must end in .oc"<<endl;
+      exit_status = EXIT_FAILURE;
+      return exit_status;
+   }
+   string command = CPP + " " + D_opt + " " + filename;
+   // printf ("command=\"%s\"\n", command.c_str());
+   cout<<"before yyin"<<endl;
+   FILE* yyin = popen (command.c_str(), "r");
+   cout<<"Preprocessor-shit"<<endl;
+   cpplines (yyin, filename);
+   cout<<"after yyin"<<endl;
+   if (yyin == nullptr) {
+      cout<<"nullptr"<<endl;  // delete before submission
+      exit_status = EXIT_FAILURE;
+      fprintf (stderr, "%s: %s: %s\n",
+         exec::execname.c_str(), command.c_str(), strerror (errno));
+   }else {
+      while(true){
+         int this_tok = yylex();
+         if(this_tok == YYEOF) break;
+         astree::dump(stdout, yylval);
       }
-      if(s_filename.substr(s_filename.length()-3) != ".oc"){
-         cerr<<"USAGE: filename must end in .oc"<<endl;
-         exit_status = EXIT_FAILURE;
-         return exit_status;
-      }
-      string command = CPP + " " + D_opt + " " + filename;
-      // printf ("command=\"%s\"\n", command.c_str());
-      cout<<"before yyin"<<endl;
-      FILE* yyin = popen (command.c_str(), "r");
-      cout<<"Preprocessor-shit"<<endl;
-      cpplines (yyin, filename);
-      cout<<"after yyin"<<endl;
-      if (yyin == nullptr) {
-         cout<<"nullptr"<<endl;
-         exit_status = EXIT_FAILURE;
-         fprintf (stderr, "%s: %s: %s\n",
-            exec::execname.c_str(), command.c_str(), strerror (errno));
-      }else {
-         while(yyin!= nullptr){
-            if(yy_flex_debug == 1){
-               yylex();             
-            }   
-         }
-         
-         int pclose_rc = pclose (yyin);
-         // print_status (command.c_str(), pclose_rc);
-         if (pclose_rc != 0) exit_status = EXIT_FAILURE;
-      }
-   //}
+      destroy(yylval);
+      // cpplines(yyin,filename);
+   }
+   int pclose_rc = pclose (yyin);
+   // print_status (command.c_str(), pclose_rc);
+   if (pclose_rc != 0) exit_status = EXIT_FAILURE;
    FILE* out_file;
    string out_name = basename (argv[1]);
    out_name = out_name.substr(0, out_name.length()-3)+".str";
+
    out_file = fopen(out_name.c_str(), "w");
    string_set::dump(out_file);
    fclose(out_file);
