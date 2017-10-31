@@ -26,97 +26,116 @@ using namespace std;
 
 const string CPP = "/usr/bin/cpp -nostdinc";
 constexpr size_t LINESIZE = 1024;
-// int yy_flex_debug = 0; // temporary var until implement yylex()
-//int yydebug = 0; // temporary var until implement yyparse()
+string cpp_command;
+int exit_status;
 
+void scan(char* name) {
+   FILE* out_str;
+   FILE* out_tok;
+   string out_name = basename (name);
+   out_name = out_name.substr(0, out_name.length()-3);
 
-// Chomp the last character from a buffer if it is delim.
-void chomp (char* string, char delim) {
-   size_t len = strlen (string);
-   if (len == 0) return;
-   char* nlpos = string + len - 1;
-   if (*nlpos == delim) *nlpos = '\0';
+   string out_name_str = out_name+".str";
+   string out_name_tok = out_name+".tok";
+
+   out_str = fopen(out_name_str.c_str(), "w");
+   out_tok = fopen(out_name_tok.c_str(),"w"); 
+
+   if (out_tok == NULL){
+   fprintf (stderr, "Error: failed to open .tok file");
+   }else{
+      for(;;){
+         int tok = yylex();
+         if (tok == YYEOF) break;
+         fprintf(out_tok,"%lu %lu.%03lu %3d %-10.10s (%s)\n",\
+         lexer::lloc.filenr, lexer::lloc.linenr,\
+         lexer::lloc.offset, tok, parser::get_tname(tok), yytext);
+         string_set::intern(yytext);
+         DEBUGF('m', "token=%d", yytext);
+      }
+   }
+   if (out_str == NULL){
+      fprintf (stderr, "Error: failed to open .str file");
+   }else{
+      string_set::dump(out_str);
+   }
+   fclose (out_str);
+   fclose (out_tok);
 }
 
-
-// Print the meaning of a signal.
-static void print_signal (const char* kind, int signal) {
-   fprintf (stderr, ", %s %d", kind, signal);
-   const char* sigstr = strsignal (signal);
-   if (sigstr != nullptr) fprintf (stderr, " %s", sigstr);
+// Open a pipe from the C preprocessor.
+// Exit failure if can't.
+// Assigns opened pipe to FILE* yyin.
+void cpp_popen (char* filename) {
+   cpp_command = CPP + " " + filename;
+   yyin = popen (cpp_command.c_str(), "r");
+   if (yyin == nullptr) {
+      syserrprintf (cpp_command.c_str());
+      exit (exec::exit_status);
+   }else {
+      if (yy_flex_debug) {
+         fprintf (stderr, "-- popen (%s), fileno(yyin) = %d\n",
+                  cpp_command.c_str(), fileno (yyin));
+      }
+      lexer::newfilename (cpp_command);
+      scan(filename);
+   }
 }
 
-
-
-// Print the status returned from a subprocess.
-void print_status (const char* command, int status) {
-   if (status == 0) return;
-   fprintf (stderr, "%s: status 0x%04X", command, status);
-   if (WIFEXITED (status)) {
-      fprintf (stderr, ", exit %d", WEXITSTATUS (status));
-   }
-   if (WIFSIGNALED (status)) {
-      print_signal ("Terminated", WTERMSIG (status));
-      #ifdef WCOREDUMP
-      if (WCOREDUMP (status)) fprintf (stderr, ", core dumped");
-      #endif
-   }
-   if (WIFSTOPPED (status)) {
-      print_signal ("Stopped", WSTOPSIG (status));
-   }
-   if (WIFCONTINUED (status)) {
-      fprintf (stderr, ", Continued");
-   }
-   fprintf (stderr, "\n");
+void cpp_pclose() {
+   int pclose_rc = pclose (yyin);
+   eprint_status (cpp_command.c_str(), pclose_rc);
+   if (pclose_rc != 0) exec::exit_status = EXIT_FAILURE;
 }
 
-int main (int argc, char** argv) {
-   
-   // Loop through argv, get opt recognizes options after -str
-   // Loop will continue, grabbing options until end of file
-   // An incompatible option following a '-' 
-   // will throw an error to sderr
-   // if a single ':' follows option, then an argument is expected 
-   // to follow said option
-   // initialize non-debug states
+void scan_opts (int argc, char** argv) {
+   opterr = 0;
+   yy_flex_debug = 0;
+   yydebug = 0;
    string D_opt = "";
-   yy_flex_debug =0;    
-   yydebug =0;
-   
+   exit_status = EXIT_SUCCESS;
+   char* filename = argv[optind];
+   string s_filename = filename;
+   // check for .oc suffix
+   if(s_filename.length()<=3 || s_filename.substr(s_filename.length()-3) != ".oc"){
+      cerr<<"USAGE: filename must end in .oc"<<endl;
+      exit_status = EXIT_FAILURE;
+      exit (exec::exit_status);
+   }
    for(;;) {
       int opt = getopt (argc, argv, "@:D:ly");
       if (opt == EOF) break;
       switch (opt) {
          case '@': set_debugflags (optarg);                 break;
          case 'D': D_opt = (optarg);                        break; 
-         case 'l':/*: yy_flex_debug = 1;*/                  break;  
-         case 'y':/*: yydebug = 1;*/                        break;
+         case 'l': yy_flex_debug = 1;                       break;  
+         case 'y': yydebug = 1;                             break;
          default:  errprintf ("bad option (%c)\n", optopt); break;
       }
    }
+   if (optind > argc) {
+      errprintf ("Usage: %s [-ly] [filename]\n",
+                 exec::execname.c_str());
+      exit (exec::exit_status);
+   }
+   //const char* filename = optind == argc ? "-" : argv[optind];
+   cpp_popen (filename);
+}
+
+
+int main (int argc, char** argv) {
 
    exec::execname = basename (argv[0]);
-   int exit_status = EXIT_SUCCESS;
-   char* filename = argv[optind];
-   string s_filename = filename;
-   // check for .oc suffix
-   if(s_filename.length()<=3){
-      cerr<<"USAGE: filename must end in .oc"<<endl;
-      exit_status = EXIT_FAILURE;
-      return exit_status;
-   }
-   if(s_filename.substr(s_filename.length()-3) != ".oc"){
-      cerr<<"USAGE: filename must end in .oc"<<endl;
-      exit_status = EXIT_FAILURE;
-      return exit_status;
-   }
-   string command = CPP + " " + D_opt + " " + filename;
-   // printf ("command=\"%s\"\n", command.c_str());
-   yyin = popen (command.c_str(), "r");
+
+   scan_opts(argc, argv);
+   int parse_rc = yyparse();
+   cpp_pclose();
+   yylex_destroy();
+   /*
    if (yyin == nullptr) {
       exit_status = EXIT_FAILURE;
       fprintf (stderr, "%s: %s: %s\n",
-         exec::execname.c_str(), command.c_str(), strerror (errno));
+         exec::execname.c_str(), cpp_command.c_str(), strerror (errno));
    }else {
       while(true){
          int this_tok = yylex();
@@ -125,16 +144,7 @@ int main (int argc, char** argv) {
       }
       destroy(yylval);
    }
-   int pclose_rc = pclose (yyin);
-   // print_status (command.c_str(), pclose_rc);
-   if (pclose_rc != 0) exit_status = EXIT_FAILURE;
-   FILE* out_file;
-   string out_name = basename (argv[1]);
-   out_name = out_name.substr(0, out_name.length()-3)+".str";
-
-   out_file = fopen(out_name.c_str(), "w");
-   string_set::dump(out_file);
-   fclose(out_file);
+   */
    return exit_status;
 }
 
