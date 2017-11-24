@@ -31,7 +31,6 @@ int exit_status;
 
 void scan(char* name) {
    FILE* out_str;
-   FILE* out_tok;
    string out_name = basename (name);
    out_name = out_name.substr(0, out_name.length()-3);
 
@@ -42,15 +41,11 @@ void scan(char* name) {
    out_tok = fopen(out_name_tok.c_str(),"w"); 
 
    if (out_tok == NULL){
-   fprintf (stderr, "Error: failed to open .tok file");
+      fprintf (stderr, "Error: failed to open .tok file");
    }else{
       for(;;){
          int tok = yylex();
          if (tok == YYEOF) break;
-         fprintf(out_tok,"%lu %lu.%03lu %3d %-10.10s (%s)\n",\
-         lexer::lloc.filenr, lexer::lloc.linenr,\
-         lexer::lloc.offset, tok, parser::get_tname(tok), yytext);
-         string_set::intern(yytext);
          DEBUGF('m', "token=%d", yytext);
       }
    }
@@ -77,7 +72,6 @@ void cpp_popen (char* filename) {
          fprintf (stderr, "-- popen (%s), fileno(yyin) = %d\n",
                   cpp_command.c_str(), fileno (yyin));
       }
-      lexer::newfilename (cpp_command);
       scan(filename);
    }
 }

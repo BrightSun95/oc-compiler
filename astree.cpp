@@ -10,6 +10,7 @@
 #include "astree.h"
 #include "string_set.h"
 #include "lyutils.h"
+#include <iostream>
 
 astree::astree (int symbol_, const location& lloc_, const char* info) {
    symbol = symbol_;
@@ -43,13 +44,10 @@ astree* astree::adopt_sym (astree* child, int symbol_) {
 }
 
 void astree::dump_node (FILE* outfile) {
-   fprintf (outfile, "%p->{%s %zd.%zd.%zd \"%s\":",
-            this, parser::get_tname (symbol),
-            lloc.filenr, lloc.linenr, lloc.offset,
-            lexinfo->c_str());
-   for (size_t child = 0; child < children.size(); ++child) {
-      fprintf (outfile, " %p", children.at(child));
-   }
+   fprintf(outfile,"  %lu %3lu.%03lu %3d %-10.10s (%s)\n",\
+            lexer::lloc.filenr, lexer::lloc.linenr,\
+            lexer::lloc.offset, this->symbol,\
+            parser::get_tname(this->symbol), yytext);
 }
 
 void astree::dump_tree (FILE* outfile, int depth) {
@@ -86,6 +84,6 @@ void errllocprintf (const location& lloc, const char* format,
    assert (sizeof buffer > strlen (format) + strlen (arg));
    snprintf (buffer, sizeof buffer, format, arg);
    errprintf ("%s:%zd.%zd: %s", 
-              lexer::filename (lloc.filenr), lloc.linenr, lloc.offset,
-              buffer);
+              lexer::filename (lloc.filenr)->c_str(), 
+                              lloc.linenr, lloc.offset, buffer);
 }

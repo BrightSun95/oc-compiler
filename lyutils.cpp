@@ -5,9 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 
 #include "auxlib.h"
 #include "lyutils.h"
+#include "astree.h"
+
+FILE* out_tok;
 
 bool lexer::interactive = true;
 location lexer::lloc = {0, 1, 0};
@@ -27,7 +31,7 @@ void lexer::newfilename (const string& filename) {
 
 void lexer::advance()  {
    if (not interactive) {
-      if (lexer::lloc.offset == 0) {
+      if (lexer::lloc.offset == 0){
          printf (";%2zd.%3zd: ",
                  lexer::lloc.filenr, lexer::lloc.linenr);
       }
@@ -57,7 +61,7 @@ void lexer::badtoken (char* lexeme) {
 void lexer::include() {
    size_t linenr;
    static char filename[0x1000];
-   assert (sizeof filename > strlen (yytext));
+   assert (sizeof filename > strlen (yytext) );
    int scan_rc = sscanf (yytext, "# %zd \"%[^\"]\"", &linenr, filename);
    if (scan_rc != 2) {
       errprintf ("%s: invalid directive, ignored\n", yytext);
@@ -68,10 +72,21 @@ void lexer::include() {
       }
       lexer::lloc.linenr = linenr - 1;
       lexer::newfilename (filename);
+      // print to .tok file when # directives are matched
+      fprintf(out_tok, "# %lu \"%2s\"\n", 
+                       filenames.size(), 
+                       filenames[filenames.size()-1].c_str());
    }
+}
+
+int yylval_token (int symbol) {
+   yylval = new astree (symbol, lexer::lloc, yytext);
+   yylval->dump_node(out_tok);
+   return symbol;
 }
 
 void yyerror (const char* message) {
    assert (not lexer::filenames.empty());
    errllocprintf (lexer::lloc, "%s\n", message);
 }
+

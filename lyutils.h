@@ -16,16 +16,19 @@ using namespace std;
 
 #define YYEOF 0
 
+
 extern FILE* yyin;
 extern char* yytext; 
 extern int yy_flex_debug;
 extern int yydebug;
-extern size_t yyleng; 
+extern size_t yyleng;
+extern FILE* out_tok;
 
 int yylex();
 int yylex_destroy();
 int yyparse();
 void yyerror (const char* message);
+int yylval_token (int symbol);
 
 struct lexer {
    static bool interactive;

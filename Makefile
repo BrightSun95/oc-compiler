@@ -69,7 +69,8 @@ clean :
 		${patsubst %, ${test}.%, out err log}}
 
 spotless : clean
-	- rm ${EXECBIN} List.*.ps List.*.pdf
+	- rm ${EXECBIN} List.*.ps List.*.pdf *.xml *.html *.log \
+	*.str *.tok *.err *.out *.oh
 
 deps : ${ALLCSRC}
 	@ echo "# ${DEPSFILE} created `date` by ${MAKE}" >${DEPSFILE}
